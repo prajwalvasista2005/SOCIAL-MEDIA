@@ -74,7 +74,7 @@ def test_login_token(token):
     assert token is not None
 
 def test_authorized_client(authorized_client):
-    print(authorized_client.headers)
+    assert authorized_client.headers.get("Authorization") is not None
 
 def test_update_user(
     authorized_client,
@@ -156,3 +156,42 @@ def test_delete_user_not_found(
 
     assert response.status_code == 404
     assert response.json()["detail"] == "The user with id 99999 was not found"
+
+def test_update_user_not_found(
+    authorized_client
+):
+    response = authorized_client.put(
+        "/users/99999",
+        json={
+            "email": "updated@gmail.com",
+            "password": "newpassword123"
+        }
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "User with id 99999 does not exist"
+
+def test_update_other_user(
+    authorized_client,
+    session
+):
+    other_user = models.User(
+        email="other@gmail.com",
+        username="otheruser",
+        password="hashedpassword"
+    )
+
+    session.add(other_user)
+    session.commit()
+    session.refresh(other_user)
+
+    response = authorized_client.put(
+        f"/users/{other_user.id}",
+        json={
+            "email": "hacked@gmail.com",
+            "password": "newpassword123"
+        }
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Not authorized to perform requested action"

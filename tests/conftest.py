@@ -71,6 +71,41 @@ def test_user(session):
     session.refresh(user)
 
     return user
+@pytest.fixture
+def test_post(session, test_user):
+    post = models.Post(
+        title="Test Title",
+        content="Test Content",
+        owner_id=test_user.id
+    )
+
+    session.add(post)
+    session.commit()
+    session.refresh(post)
+
+    return post
+
+@pytest.fixture
+def test_posts(session, test_user):
+    posts_data = [
+        {
+            "title": "First Post",
+            "content": "Content 1",
+            "owner_id": test_user.id
+        },
+        {
+            "title": "Second Post",
+            "content": "Content 2",
+            "owner_id": test_user.id
+        }
+    ]
+
+    posts = [models.Post(**post) for post in posts_data]
+
+    session.add_all(posts)
+    session.commit()
+
+    return posts
 
 @pytest.fixture
 def token(client, test_user):
@@ -92,3 +127,22 @@ def authorized_client(client, token):
     }
 
     return client
+
+@pytest.fixture
+def test_comment(
+    session,
+    test_post,
+    test_user
+):
+    comment = models.Comment(
+        content="Test Comment",
+        post_id=test_post.id,
+        user_id=test_user.id
+    )
+
+    session.add(comment)
+    session.commit()
+    session.refresh(comment)
+
+    return comment
+
