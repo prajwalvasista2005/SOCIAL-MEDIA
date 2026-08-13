@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-
+from sqlalchemy.exc import IntegrityError
 from .. import models, schemas, utils, oauth2
 from ..database import get_db
 
@@ -27,8 +27,17 @@ def create_user(
     new_user = models.User(**user_data)
 
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+
+    try:
+        db.commit()
+        db.refresh(new_user)
+
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists"
+        )
 
     return new_user
 

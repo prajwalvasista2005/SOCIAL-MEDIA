@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.main import app
 from app.database import Base, get_db
+from app import models,utils
 
 
 SQLALCHEMY_DATABASE_URL = (
@@ -56,3 +57,38 @@ def client(session):
         yield client
 
     app.dependency_overrides.clear()
+
+@pytest.fixture
+def test_user(session):
+    user = models.User(
+        email="test@gmail.com",
+        username="testuser",
+        password=utils.hash("password123")
+    )
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user
+
+@pytest.fixture
+def token(client, test_user):
+    response = client.post(
+        "/login",
+        data={
+            "username": test_user.email,
+            "password": "password123"
+        }
+    )
+
+    return response.json()["access_token"]
+
+@pytest.fixture
+def authorized_client(client, token):
+    client.headers = {
+        **client.headers,
+        "Authorization": f"Bearer {token}"
+    }
+
+    return client
