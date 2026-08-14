@@ -6,13 +6,17 @@ from sqlalchemy.orm import sessionmaker
 from app.main import app
 from app.database import Base, get_db
 from app import models,utils
+from app.config import settings
+from urllib.parse import quote_plus
 
+password = quote_plus(settings.database_password)
 
 SQLALCHEMY_DATABASE_URL = (
-    "postgresql://postgres:"
-    "prajwal%40123@"
-    "127.0.0.1:5432/"
-    "fastapi_test"
+    f"postgresql://{settings.database_username}:"
+    f"{password}@"
+    f"{settings.database_hostname}:"
+    f"{settings.database_port}/"
+    f"{settings.database_name}"
 )
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
