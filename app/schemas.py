@@ -96,6 +96,7 @@ class UserProfile(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token:str
     token_type: str
 
 
@@ -110,3 +111,11 @@ class Vote(BaseModel):
 
 class Follow(BaseModel):
     following_id: int
+
+class RefreshtokenRequest(BaseModel):
+    refresh_token:str
+
+class AccessTokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+  

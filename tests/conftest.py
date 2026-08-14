@@ -1,13 +1,15 @@
+import os
+os.environ["ENV_FILE"] = ".env.test"
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from urllib.parse import quote_plus
 
 from app.main import app
 from app.database import Base, get_db
-from app import models,utils
+from app import models, utils
 from app.config import settings
-from urllib.parse import quote_plus
 
 password = quote_plus(settings.database_password)
 

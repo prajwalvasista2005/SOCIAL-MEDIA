@@ -87,3 +87,19 @@ class SavedPost(Base):
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
+
+class RefreshToken(Base):
+    __tablename__="refresh_tokens"
+    id=Column(Integer,primary_key=True,nullable=False)
+    user_id=Column(Integer,ForeignKey("users.id",ondelete="CASCADE"),nullable=False)
+    token_hash=Column(String,nullable=False,index=True)
+    created_at = Column(
+            TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
+        )
+    expires_at = Column(
+    TIMESTAMP(timezone=True),
+    nullable=False
+    )
+    revoked=Column(Boolean,default=False,nullable=False)
+
+    

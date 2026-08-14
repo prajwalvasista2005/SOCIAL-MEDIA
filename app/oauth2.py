@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from . import database, models, schemas
 from .config import settings
-
+import secrets
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
@@ -74,3 +74,6 @@ def get_current_user(
         raise credential_exception
 
     return user
+def create_refresh_token():
+    token = secrets.token_urlsafe(64)
+    return token

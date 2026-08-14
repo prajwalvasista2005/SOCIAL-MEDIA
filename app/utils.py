@@ -1,5 +1,5 @@
 from passlib.context import CryptContext
-
+import hashlib
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
@@ -15,3 +15,6 @@ def verify(plain_password: str, hashed_password: str):
         plain_password,
         hashed_password,
     )
+
+def hash_refresh_token(value:str):
+    return hashlib.sha256(value.encode()).hexdigest()
