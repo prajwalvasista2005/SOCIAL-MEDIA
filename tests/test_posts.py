@@ -5,7 +5,7 @@ def test_create_post(
     authorized_client
 ):
     response = authorized_client.post(
-        "/sqlalchemy",
+        "/posts",
         json={
             "title": "My First Post",
             "content": "Hello World",
@@ -21,7 +21,7 @@ def test_create_post(
 
 def test_create_post_unauthorized(client):
     response = client.post(
-        "/sqlalchemy",
+        "/posts",
         json={
             "title": "My First Post",
             "content": "Hello World",
@@ -36,7 +36,7 @@ def test_get_post(
     test_post
 ):
     response = authorized_client.get(
-        f"/sqlalchemy/{test_post.id}"
+        f"/posts/{test_post.id}"
     )
 
     data = response.json()
@@ -50,7 +50,7 @@ def test_get_post_not_found(
     authorized_client
 ):
     response = authorized_client.get(
-        "/sqlalchemy/99999"
+        "/posts/99999"
     )
 
     assert response.status_code == 404
@@ -60,7 +60,7 @@ def test_get_all_posts(
     authorized_client,
     test_posts
 ):
-    response = authorized_client.get("/sqlalchemy")
+    response = authorized_client.get("/posts")
 
     data = response.json()
 
@@ -72,7 +72,7 @@ def test_get_all_posts_limit(
     test_posts
 ):
     response = authorized_client.get(
-        "/sqlalchemy?limit=1"
+        "/posts?limit=1"
     )
 
     data = response.json()
@@ -85,7 +85,7 @@ def test_get_all_posts_skip(
     test_posts
 ):
     response = authorized_client.get(
-        "/sqlalchemy?skip=1"
+        "/posts?skip=1"
     )
 
     data = response.json()
@@ -98,7 +98,7 @@ def test_update_post(
     test_post
 ):
     response = authorized_client.put(
-        f"/sqlalchemy/{test_post.id}",
+        f"/posts/{test_post.id}",
         json={
             "title": "Updated Title",
             "content": "Updated Content",
@@ -116,7 +116,7 @@ def test_update_post_not_found(
     authorized_client
 ):
     response = authorized_client.put(
-        "/sqlalchemy/99999",
+        "/posts/99999",
         json={
             "title": "Updated Title",
             "content": "Updated Content",
@@ -152,7 +152,7 @@ def test_update_other_users_post(
     session.refresh(other_post)
 
     response = authorized_client.put(
-        f"/sqlalchemy/{other_post.id}",
+        f"/posts/{other_post.id}",
         json={
             "title": "Hacked",
             "content": "Hacked Content",
@@ -168,7 +168,7 @@ def test_delete_post(
     test_post
 ):
     response = authorized_client.delete(
-        f"/sqlalchemy/{test_post.id}"
+        f"/posts/{test_post.id}"
     )
 
     assert response.status_code == 204
@@ -177,7 +177,7 @@ def test_delete_post_not_found(
     authorized_client
 ):
     response = authorized_client.delete(
-        "/sqlalchemy/99999"
+        "/posts/99999"
     )
 
     assert response.status_code == 404
@@ -208,7 +208,7 @@ def test_delete_other_users_post(
     session.refresh(other_post)
 
     response = authorized_client.delete(
-        f"/sqlalchemy/{other_post.id}"
+        f"/posts/{other_post.id}"
     )
 
     assert response.status_code == 403

@@ -8,7 +8,7 @@ from .. import models, oauth2, schemas
 from ..database import get_db
 
 router = APIRouter(
-    prefix="/sqlalchemy",
+    prefix="/posts",
     tags=["Posts"],
 )
 

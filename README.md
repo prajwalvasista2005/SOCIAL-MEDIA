@@ -148,11 +148,11 @@ requirements.txt
 
 | Method | Endpoint |
 |----------|----------|
-| POST | /sqlalchemy |
-| GET | /sqlalchemy |
-| GET | /sqlalchemy/{id} |
-| PUT | /sqlalchemy/{id} |
-| DELETE | /sqlalchemy/{id} |
+| POST | /posts |
+| GET | /posts |
+| GET | /posts/{id} |
+| PUT | /posts/{id} |
+| DELETE | /posts/{id} |
 
 ### Votes
 

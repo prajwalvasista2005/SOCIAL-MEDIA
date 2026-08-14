@@ -83,10 +83,7 @@ def unsave_post(
     return None
 
 
-@router.get(
-    "",
-    response_model=list[schemas.PostDetail],
-)
+
 @router.get(
     "",
     response_model=list[schemas.PostDetail],
