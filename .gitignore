@@ -8,3 +8,7 @@ venv/
 .coverage
 htmlcov/
 .vscode/
+.env
+.env.local
+.env.testing
+.env.*
