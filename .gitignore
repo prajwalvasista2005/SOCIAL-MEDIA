@@ -12,3 +12,9 @@ htmlcov/
 .env.local
 .env.testing
 .env.*
+
+.env
+.env.local
+.env.testing
+.env.test
+.env.*
