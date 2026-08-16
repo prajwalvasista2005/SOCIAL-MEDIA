@@ -9,6 +9,8 @@ class Post(Base):
     title: str = Column(String, nullable=False)
     content: str = Column(String, nullable=False)
     published: bool = Column(Boolean, server_default="TRUE", nullable=False)
+    image_url:str=Column(String,nullable=True)
+    image_public_id:str=Column(String,nullable=True)
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
@@ -24,6 +26,8 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     username = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
+    profile_picture_url=Column(String,nullable=True)
+    profile_picture_public_id = Column(String, nullable=True)
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )

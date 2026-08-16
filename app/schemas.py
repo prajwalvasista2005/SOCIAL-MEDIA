@@ -8,6 +8,8 @@ class PostBase(BaseModel):
     title: str
     content: str
     published: bool = True
+    image_url: Optional[str] = None
+    image_public_id: Optional[str] = None
 
 
 class PostCreate(PostBase):
@@ -72,7 +74,7 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     username: str
-
+    profile_picture_url: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -90,6 +92,7 @@ class UserProfile(BaseModel):
     id: int
     email: EmailStr
     username: str
+    profile_picture_url: str | None = None
     followers_count: int
     following_count: int
 

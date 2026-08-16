@@ -1,11 +1,12 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from .. import models, oauth2, schemas
+from .. import models, oauth2, schemas,cloudinary_utils
 from ..database import get_db
+
 
 router = APIRouter(
     prefix="/posts",
@@ -109,6 +110,94 @@ def update_post(
     return post
 
 
+@router.post(
+    "/{id}/image",
+    response_model=schemas.Post,
+)
+async def upload_post_image(
+    id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(oauth2.get_current_user),
+):
+    # Check post exists
+    post = db.query(models.Post).filter(models.Post.id == id).first()
+
+    if post is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {id} not found",
+        )
+
+    # Check ownership
+    if post.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action",
+        )
+
+    # Validate image type
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid image type. Allowed: JPEG, PNG, WebP, GIF",
+        )
+
+    # Delete old image if exists
+    if post.image_public_id:
+        cloudinary_utils.delete_image(post.image_public_id)
+
+    # Upload new image
+    upload_result = cloudinary_utils.upload_image(
+        file.file,
+        folder="social-media-post-images"
+    )
+
+    # Update post
+    post.image_url = upload_result["url"]
+    post.image_public_id = upload_result["public_id"]
+    db.commit()
+    db.refresh(post)
+
+    return post
+
+
+@router.delete(
+    "/{id}/image",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_post_image(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(oauth2.get_current_user),
+):
+    post = db.query(models.Post).filter(models.Post.id == id).first()
+
+    if post is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {id} not found",
+        )
+
+    if post.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action",
+        )
+
+    # Delete image from Cloudinary
+    if post.image_public_id:
+        cloudinary_utils.delete_image(post.image_public_id)
+
+    # Clear image fields
+    post.image_url = None
+    post.image_public_id = None
+    db.commit()
+
+    return None
+
+
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -131,6 +220,10 @@ def delete_post(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to perform requested action",
         )
+
+    # Delete image from Cloudinary if exists
+    if post.image_public_id:
+        cloudinary_utils.delete_image(post.image_public_id)
 
     db.delete(post)
     db.commit()

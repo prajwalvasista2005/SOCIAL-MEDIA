@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, status, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from .. import models, schemas, utils, oauth2
+from .. import models, schemas, utils, oauth2,cloudinary_utils
 from ..database import get_db
 
 router = APIRouter(
@@ -218,3 +218,33 @@ def get_following(
     )
 
     return following
+
+@router.post("/me/profile-picture")
+def upload_profile_picture(
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(oauth2.get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File must be an image"
+        )
+
+    if current_user.profile_picture_public_id:
+        cloudinary_utils.delete_image(
+        current_user.profile_picture_public_id
+    )
+
+    upload_result = cloudinary_utils.upload_image(file.file)
+    print(upload_result)
+
+    current_user.profile_picture_url = upload_result["url"]
+    current_user.profile_picture_public_id = upload_result["public_id"]
+
+    db.commit()
+    db.refresh(current_user)
+
+    return {
+        "profile_picture_url": current_user.profile_picture_url
+    }
