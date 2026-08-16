@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     cloudinary_api_secret: str
 
     model_config = SettingsConfigDict(
-        env_file=os.getenv("ENV_FILE", ".env")
+        env_file=".env" if os.path.exists(".env") else None
     )
 
 
