@@ -37,3 +37,6 @@ app.include_router(comments.router)
 app.include_router(follow.router)
 app.include_router(saved_post.router)
 
+@app.get("/")
+def root():
+    return {"message": "API is running"}
