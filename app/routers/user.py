@@ -48,10 +48,19 @@ def create_user(
 )
 def get_all_users(
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(oauth2.get_current_user),
+    search: str | None = Query(default=None, max_length=50),
 ):
-    users = db.query(models.User).all()
+    query = db.query(models.User).filter(
+        models.User.id != current_user.id
+    )
 
-    return users
+    if search:
+        query = query.filter(
+            models.User.username.ilike(f"%{search}%")
+        )
+
+    return query.limit(20).all()
 @router.get(
     "/me",
     response_model=schemas.UserProfile,
