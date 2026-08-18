@@ -18,9 +18,9 @@ origins = [
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:5174",
-    "http://localhost:5175"
+    "http://localhost:5175",
+    "https://commonplace-frontend-snowy.vercel.app",
 ]
-
 
 app.add_middleware(
     CORSMiddleware,
