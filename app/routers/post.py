@@ -267,11 +267,25 @@ def get_all(
 
     results = query.limit(limit).offset(skip).all()
 
-    return [
-        {
-            "post": row.Post,
-            "votes": row.votes,
-            "comments_count": row.comments_count,
-        }
-        for row in results
-    ]
+    response = []
+
+    for row in results:
+        existing_vote = (
+            db.query(models.Votes)
+            .filter(
+                models.Votes.post_id == row.Post.id,
+                models.Votes.user_id == current_user.id,
+            )
+            .first()
+        )
+
+        response.append(
+            {
+                "post": row.Post,
+                "votes": row.votes,
+                "comments_count": row.comments_count,
+                "user_vote": existing_vote is not None,
+            }
+        )
+
+    return response

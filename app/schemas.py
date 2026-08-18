@@ -60,6 +60,7 @@ class PostFeed(BaseModel):
     post: Post
     votes: int
     comments_count: int
+    user_vote: bool
 
     model_config = ConfigDict(from_attributes=True)
 
