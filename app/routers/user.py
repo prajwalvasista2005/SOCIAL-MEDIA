@@ -52,7 +52,34 @@ def get_all_users(
     users = db.query(models.User).all()
 
     return users
+@router.get(
+    "/me",
+    response_model=schemas.UserProfile,
+)
+def get_me(
+    current_user: models.User = Depends(oauth2.get_current_user),
+    db: Session = Depends(get_db),
+):
+    followers_count = (
+        db.query(models.Follow)
+        .filter(models.Follow.following_id == current_user.id)
+        .count()
+    )
 
+    following_count = (
+        db.query(models.Follow)
+        .filter(models.Follow.follower_id == current_user.id)
+        .count()
+    )
+
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "username": current_user.username,
+        "profile_picture_url": current_user.profile_picture_url,
+        "followers_count": followers_count,
+        "following_count": following_count,
+    }
 
 @router.get(
     "/{id}",
