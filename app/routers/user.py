@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from .. import models, schemas, utils, oauth2,cloudinary_utils
 from ..database import get_db
-
+from typing import List
 router = APIRouter(
     prefix="/users",
     tags=["Users"],
@@ -89,6 +89,19 @@ def get_me(
         "followers_count": followers_count,
         "following_count": following_count,
     }
+
+@router.get("/me/following-ids",response_model=List[int])
+def get_my_following_ids(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(oauth2.get_current_user),
+):
+    following = (
+        db.query(models.Follow.following_id)
+        .filter(models.Follow.follower_id == current_user.id)
+        .all()
+    )
+
+    return [row.following_id for row in following]
 
 @router.get(
     "/{id}",
@@ -284,3 +297,5 @@ def upload_profile_picture(
     return {
         "profile_picture_url": current_user.profile_picture_url
     }
+
+
